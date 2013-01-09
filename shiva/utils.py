@@ -6,16 +6,18 @@ import translitcodec
 
 PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
+
 def slugify(text):
     """Generates an ASCII-only slug."""
     result = []
-    text = text.decode('utf-8')
+    text = text
     for word in PUNCT_RE.split(text.lower()):
         word = word.encode('translit/long')
         if word:
             result.append(word)
 
     return unicode(u'-'.join(result))
+
 
 def _import(class_path):
     bits = class_path.split('.')
@@ -36,7 +38,15 @@ class ID3Manager(object):
 
         if not self.reader.tag:
             self.reader.tag = eyed3.id3.Tag()
-            self.reader.tag.save(mp3_path)
+            self.reader.tag.track_num = (None, None)
+
+        if self.reader.tag.album is None:
+            self.reader.tag.album = u''
+
+        if self.reader.tag.artist is None:
+            self.reader.tag.artist = u''
+
+        self.reader.tag.save(mp3_path)
 
     def __getattribute__(self, attr):
         _super = super(ID3Manager, self)
